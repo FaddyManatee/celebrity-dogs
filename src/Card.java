@@ -1,4 +1,6 @@
-public class Dog {
+import java.util.Random;
+
+public class Card {
     private String name;
     private int exercise;
     private int intelligence;
@@ -6,17 +8,17 @@ public class Dog {
     private int drool;
 
     /**
-     * Creates a fully initialized instance of Dog from a comma seperated list of values.
-     * @param s of the form: name,exercise,intelligence,friendliness,drool
+     * Creates a fully initialized instance of Card with random stats using a given name.
+     * @param s the name of the dog that this object represents.
      */
-    public Dog(String s) {
-        String[] values = s.split(",");
-        
-        name         = values[0];
-        exercise     = Integer.parseInt(values[1]);
-        intelligence = Integer.parseInt(values[2]);
-        friendliness = Integer.parseInt(values[3]);
-        drool        = Integer.parseInt(values[4]);
+    public Card(String s) {
+        Random r = new Random();
+
+        name = s;
+        exercise     = r.nextInt(5 - 1)   + 1;
+        intelligence = r.nextInt(100 - 1) + 1;
+        friendliness = r.nextInt(10 - 1)  + 1;
+        drool        = r.nextInt(10 - 1)  + 1;
     }
 
     @Override
