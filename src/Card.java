@@ -14,7 +14,7 @@ public class Card {
     public Card(String s) {
         Random r = new Random();
 
-        name = s;
+        name         = s;
         exercise     = r.nextInt(5 - 1)   + 1;
         intelligence = r.nextInt(100 - 1) + 1;
         friendliness = r.nextInt(10 - 1)  + 1;
@@ -25,17 +25,16 @@ public class Card {
     public String toString() {
         StringBuilder sb = new StringBuilder();
 
-        sb.append("{ ");
         sb.append(name);
-        sb.append(", ");
+        sb.append("\nE: ");
         sb.append(exercise);
-        sb.append(", ");
+        sb.append("\nI: ");
         sb.append(intelligence);
-        sb.append(", ");
+        sb.append("\nF: ");
         sb.append(friendliness);
-        sb.append(", ");
+        sb.append("\nD: ");
         sb.append(drool);
-        sb.append(" }");
+        sb.append("\n");
 
         return sb.toString();
     }
