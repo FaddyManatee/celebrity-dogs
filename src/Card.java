@@ -1,5 +1,12 @@
 import java.util.Random;
 
+enum Stat {
+    EXERCISE,
+    INTELLIGENCE,
+    FRIENDLINESS,
+    DROOL
+}
+
 public class Card {
     private String name;
     private int exercise;
@@ -47,11 +54,11 @@ public class Card {
         return exercise;
     }
 
-    public int getStatIQ() {
+    public int getStatIntelligence() {
         return intelligence;
     }
 
-    public int getStatFriend() {
+    public int getStatFriendliness() {
         return friendliness;
     }
 
