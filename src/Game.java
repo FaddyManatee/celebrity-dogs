@@ -15,6 +15,12 @@ public class Game {
     private boolean cpuStat;
     private int hand;
 
+    private static final String ANSI_RESET = "\u001B[0m";
+    private static final String ANSI_RED   = "\u001B[31m";
+    private static final String ANSI_GREEN = "\u001B[32m";
+    private static final String ANSI_YELLOW  = "\u001B[33m";
+    private static final String ANSI_CYAN  = "\u001B[36m";
+
     public Game(String path) {
         deck = readFile(path);
         player = new ArrayList<>();
@@ -23,16 +29,15 @@ public class Game {
     }
 
     public void start() {
-        clearScreen();
         displayMenu();
 
         Integer i = null;
-        //while (i == null)
+        while (i == null)
             i = promptHandSize();
         dealCards();
 
         while (true) {
-            System.out.println("-------------------------------------");
+            System.out.println("----------------------------------------");
             if (!cpuStat) {
                 turnPlayer();
                 System.out.println("(CPU)");
@@ -53,27 +58,43 @@ public class Game {
             // REMOVE
 
             if (player.size() == hand * 2) {
-                System.out.println("Player wins the game!");
+                printlnCol("Player wins the game!", ANSI_YELLOW);
+                System.out.println("----------------------------------------");
                 break;
             }
 
             if (cpu.size() == hand * 2) {
-                System.out.println("CPU wins the game!");
+                printlnCol("CPU wins the game!", ANSI_YELLOW);
+                System.out.println("----------------------------------------");
                 break;
             }
         }
     }
 
-    private void clearScreen() {
-        // System.out.print("\033[H\033[2J");
-        // System.out.flush();
+    public void reset() {
+        while (player.size() != 0) {
+            deck.add(player.remove(0));
+        }
+
+        while (cpu.size() != 0) {
+            deck.add(cpu.remove(0));
+        }
+        cpuStat = false;
+    }
+
+    private void printlnCol(String text, String colour) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(colour);
+        sb.append(text);
+        sb.append(ANSI_RESET);
+        System.out.println(sb.toString());
     }
 
     private void displayMenu() {
         Scanner scanner = new Scanner(System.in);
         String input;
 
-        System.out.println("Celebrity Dogs");
+        printlnCol("Celebrity Dogs", ANSI_CYAN);
         System.out.println("1) Play Game");
         System.out.println("2) Quit\n");
         System.out.print("Enter choice: ");
@@ -87,24 +108,17 @@ public class Game {
             input = scanner.nextLine();
         }
         scanner.close();
-        clearScreen();
 
         if (input.compareTo("2") == 0) {
             try {
                 System.out.println("Closing the game...");
                 Thread.sleep(1000);
-                clearScreen();
                 System.exit(0);
             }
             catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
         }
-
-        try {
-            System.out.println(System.in.available());
-        }
-        catch (Exception e) {}
     }
 
     private ArrayList<Card> readFile(String path) {
@@ -168,7 +182,6 @@ public class Game {
         System.out.println(player.get(0).toString());
 
         curStat = Stat.values()[promptStat()];
-        clearScreen();
     }
 
     private void turnCPU() {
@@ -179,7 +192,6 @@ public class Game {
 
         Random r = new Random();
         curStat = Stat.values()[r.nextInt(4)];
-        clearScreen();
     }
 
     private int promptStat() {
@@ -201,7 +213,8 @@ public class Game {
         if (curStat == Stat.EXERCISE) {
             stat1 = player.get(0).getStatExercise();
             stat2 = cpu.get(0).getStatExercise();
-            System.out.println(String.format("You: %s vs. CPU: %s (Highest EXERCISE wins)", stat1, stat2));
+            System.out.println(
+                String.format("You: %s vs. CPU: %s (Highest %s wins)", stat1, stat2, Stat.EXERCISE.toString()));
 
             if (stat2 > stat1)
                 cpuWins = true;
@@ -209,7 +222,8 @@ public class Game {
         else if (curStat == Stat.INTELLIGENCE) {
             stat1 = player.get(0).getStatIntelligence();
             stat2 = cpu.get(0).getStatIntelligence();
-            System.out.println(String.format("You: %s vs. CPU: %s (Highest INTELLIGENCE wins)", stat1, stat2));
+            System.out.println(
+                String.format("You: %s vs. CPU: %s (Highest %s wins)", stat1, stat2, Stat.INTELLIGENCE.toString()));
 
             if (stat2 > stat1)
                 cpuWins = true;
@@ -217,7 +231,8 @@ public class Game {
         else if (curStat == Stat.FRIENDLINESS) {
             stat1 = player.get(0).getStatFriendliness();
             stat2 = cpu.get(0).getStatFriendliness();
-            System.out.println(String.format("You: %s vs. CPU: %s (Highest FRIENDLINESS wins)", stat1, stat2));
+            System.out.println(
+                String.format("You: %s vs. CPU: %s (Highest %s wins)", stat1, stat2, Stat.FRIENDLINESS.toString()));
 
             if (stat2 > stat1)
                 cpuWins = true;
@@ -225,7 +240,8 @@ public class Game {
         else if (curStat == Stat.DROOL) {
             stat1 = player.get(0).getStatDrool();
             stat2 = cpu.get(0).getStatDrool();
-            System.out.println(String.format("You: %s vs. CPU: %s (Lowest DROOL wins)", stat1, stat2));
+            System.out.println(
+                String.format("You: %s vs. CPU: %s (Lowest %s wins)", stat1, stat2, Stat.DROOL.toString()));
 
             if (stat2 < stat1)
                 cpuWins = true;
@@ -235,16 +251,16 @@ public class Game {
             draw = true;
 
         if (cpuWins) {
-            System.out.println("You lose this round!");
+            printlnCol("You lose this round!", ANSI_RED);
             cpu.add(cpu.remove(0));
             cpu.add(player.remove(0));
             cpuStat = true;
         }
         else {
             if (draw)
-                System.out.println("You win this round! (by draw)");
+                printlnCol("You win this round! (by draw)", ANSI_GREEN);
             else
-                System.out.println("You win this round!");
+                printlnCol("You win this round!", ANSI_GREEN);
             player.add(player.remove(0));
             player.add(cpu.remove(0));
             cpuStat = false;

@@ -1,6 +1,9 @@
 public class Main {
     public static void main(String[] args) {
         Game g = new Game("dogs.txt");
-        g.start();
+        while (true) {
+            g.start();
+            g.reset();
+        }
     }
 }
