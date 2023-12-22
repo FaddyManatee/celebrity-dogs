@@ -16,12 +16,12 @@ public class Card {
 
     /**
      * Creates a fully initialized instance of Card with random stats using a given name.
-     * @param s the name of the dog that this object represents.
+     * @param name the name of the dog that this object represents.
      */
-    public Card(String s) {
+    public Card(String name) {
         Random r = new Random();
 
-        name         = s;
+        this.name    = name;
         exercise     = r.nextInt(5 - 1)   + 1;
         intelligence = r.nextInt(100 - 1) + 1;
         friendliness = r.nextInt(10 - 1)  + 1;
