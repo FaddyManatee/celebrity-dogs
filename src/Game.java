@@ -334,8 +334,8 @@ public class Game {
 
         if (cpuWins) {
             printlnCol("You lose this round!", ANSI_RED);
-            cpu.add(cpu.remove(0));
             cpu.add(player.remove(0));
+            cpu.add(cpu.remove(0));
             cpuStat = true;
         }
         else {
@@ -343,8 +343,9 @@ public class Game {
                 printlnCol("You win this round! (by draw)", ANSI_GREEN);
             else
                 printlnCol("You win this round!", ANSI_GREEN);
-            player.add(player.remove(0));
+            
             player.add(cpu.remove(0));
+            player.add(player.remove(0));
             cpuStat = false;
         }
         printlnCol(String.format("Cards: Player has %d, CPU has %d", player.size(), cpu.size()), ANSI_MAGENTA);
