@@ -8,6 +8,7 @@ import java.util.Random;
 import java.util.Scanner;
 
 public class Game {
+    private Scanner scanner;
     private ArrayList<Card> deck;
     private ArrayList<Card> player;
     private ArrayList<Card> cpu;
@@ -15,60 +16,53 @@ public class Game {
     private boolean cpuStat;
     private int hand;
 
-    private static final String ANSI_RESET = "\u001B[0m";
-    private static final String ANSI_RED   = "\u001B[31m";
-    private static final String ANSI_GREEN = "\u001B[32m";
+    private static final String ANSI_RESET   = "\u001B[0m";
+    private static final String ANSI_RED     = "\u001B[31m";
+    private static final String ANSI_GREEN   = "\u001B[32m";
     private static final String ANSI_YELLOW  = "\u001B[33m";
-    private static final String ANSI_CYAN  = "\u001B[36m";
+    private static final String ANSI_MAGENTA = "\u001B[35m";
+    private static final String ANSI_CYAN    = "\u001B[36m";
 
     public Game(String path) {
+        scanner = new Scanner(System.in);
         deck = readFile(path);
         player = new ArrayList<>();
         cpu = new ArrayList<>();
-        cpuStat = false;  // Player chooses their stat first.
+        cpuStat = false;  // Determines turn. Player chooses their stat first.
     }
 
     public void start() {
         displayMenu();
 
-        Integer i = null;
-        while (i == null)
-            i = promptHandSize();
+        int input = 0;
+        while (input == 0)
+            input = promptHandSize();
         dealCards();
 
         while (true) {
             System.out.println("----------------------------------------");
             if (!cpuStat) {
                 turnPlayer();
-                System.out.println("(CPU)");
-                System.out.println(cpu.get(0).toString());
             }
             else {
                 turnCPU();
             }
             evaluate();
-            
-            // REMOVE
-            try {
-                Thread.sleep(5000);
-            }
-            catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-            // REMOVE
+
+            if (player.size() != 0 && cpu.size() != 0)
+                promptContinue();
 
             if (player.size() == hand * 2) {
                 printlnCol("Player wins the game!", ANSI_YELLOW);
-                System.out.println("----------------------------------------");
                 break;
             }
 
             if (cpu.size() == hand * 2) {
                 printlnCol("CPU wins the game!", ANSI_YELLOW);
-                System.out.println("----------------------------------------");
                 break;
             }
         }
+        System.out.println("----------------------------------------");
     }
 
     public void reset() {
@@ -91,7 +85,6 @@ public class Game {
     }
 
     private void displayMenu() {
-        Scanner scanner = new Scanner(System.in);
         String input;
 
         printlnCol("Celebrity Dogs", ANSI_CYAN);
@@ -107,7 +100,6 @@ public class Game {
             System.out.print("Enter: ");
             input = scanner.nextLine();
         }
-        scanner.close();
 
         if (input.compareTo("2") == 0) {
             try {
@@ -142,30 +134,28 @@ public class Game {
         return result;
     }
 
-    private Integer promptHandSize() {
-        // Scanner scanner = new Scanner(System.in);
-        // int input;
+    private int promptHandSize() {
+        String input;
+        int num;
 
-        // try {
-        //     System.out.print("Enter number of starting cards per player: ");
-        //     input = Integer.parseInt(scanner.nextLine());
+        try {
+            System.out.print("Enter number of starting cards per player: ");
+            input = scanner.next();
+            num = Integer.parseInt(input);
 
-        //     while (input < 4 || input > deck.size() || input % 2 != 0) {
-        //         System.out.println("\nTry again");
-        //         System.out.print("Enter: ");
-        //         input = Integer.parseInt(scanner.nextLine());
-        //     }
-        // }
-        // catch (Exception e) {
-        //     return null;
-        // }
-        // finally {
-        //     scanner.close();
-        //     clearScreen();
-        // }
+            while (num < 4 || num > deck.size() || num % 2 != 0) {
+                System.out.println("\nTry again");
+                System.out.print("Enter: ");
+                input = scanner.nextLine();
+                num = Integer.parseInt(input);
+            }
+        }
+        catch (Exception e) {
+            return 0;
+        }
     
-        hand = 4;
-        return 4;
+        hand = num;
+        return num;
     }
 
     private void dealCards() {
@@ -180,8 +170,12 @@ public class Game {
     private void turnPlayer() {
         System.out.println("(You)");
         System.out.println(player.get(0).toString());
-
+        
         curStat = Stat.values()[promptStat()];
+        
+        System.out.println(String.format("You chose %s\n", curStat.toString()));
+        System.out.println("(CPU)");
+        System.out.println(cpu.get(0).toString());
     }
 
     private void turnCPU() {
@@ -192,63 +186,151 @@ public class Game {
 
         Random r = new Random();
         curStat = Stat.values()[r.nextInt(4)];
+
+        try {
+            System.out.println("CPU is thinking...");
+            Thread.sleep(3000);
+        }
+        catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        System.out.println(String.format("CPU chose %s\n", curStat.toString()));
     }
 
     private int promptStat() {
-        // TODO
-        return 0;
+        String input;
+        int stat = 0;
+
+        System.out.print("Choose a stat E, I, F or D: ");
+        input = scanner.nextLine();
+        input = input.toUpperCase();
+
+        while (input.compareTo("E") != 0 &&
+               input.compareTo("I") != 0 &&
+               input.compareTo("F") != 0 &&
+               input.compareTo("D") != 0)
+        {
+            System.out.println("\nTry again");
+            System.out.print("Enter: ");
+            input = scanner.nextLine();
+            input = input.toUpperCase();
+        }
+
+        switch (input.charAt(0)) {
+            case 'E':
+                stat = Stat.EXERCISE.ordinal();
+                break;
+        
+            case 'I':
+                stat = Stat.INTELLIGENCE.ordinal();
+                break;
+
+            case 'F':
+                stat = Stat.FRIENDLINESS.ordinal();
+                break;
+
+            case 'D':
+                stat = Stat.DROOL.ordinal();
+                break;
+        }
+        return stat;
+    }
+
+    private void promptContinue() {
+        System.out.print("Press ENTER to continue");
+        scanner.nextLine();
+    }
+
+    private String winning(int stat) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(ANSI_GREEN);
+        sb.append(stat);
+        sb.append(ANSI_RESET);
+        return sb.toString();
+    }
+
+    private String losing(int stat) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(ANSI_RED);
+        sb.append(stat);
+        sb.append(ANSI_RESET);
+        return sb.toString();
     }
 
     private void evaluate() {
-        int stat1 = 0;
-        int stat2 = 0;
+        int statPlayer = 0;
+        int statCPU = 0;
         boolean cpuWins = false;  // Assume initially CPU to win is false. Player wins if the round is a draw.
         boolean draw = false;
 
-        if (cpuStat)
-            System.out.println(String.format("CPU chose %s", curStat.toString()));
-        else
-            System.out.println(String.format("You chose %s", curStat.toString()));
+        switch (curStat.ordinal()) {
+            case 0:  // EXERCISE
+                statPlayer = player.get(0).getStatExercise();
+                statCPU = cpu.get(0).getStatExercise();
 
-        if (curStat == Stat.EXERCISE) {
-            stat1 = player.get(0).getStatExercise();
-            stat2 = cpu.get(0).getStatExercise();
-            System.out.println(
-                String.format("You: %s vs. CPU: %s (Highest %s wins)", stat1, stat2, Stat.EXERCISE.toString()));
+                if (statCPU > statPlayer)
+                    cpuWins = true;           
+                break;
+        
+            case 1:  // INTELLIGENCE
+                statPlayer = player.get(0).getStatIntelligence();
+                statCPU = cpu.get(0).getStatIntelligence();
 
-            if (stat2 > stat1)
-                cpuWins = true;
-        }
-        else if (curStat == Stat.INTELLIGENCE) {
-            stat1 = player.get(0).getStatIntelligence();
-            stat2 = cpu.get(0).getStatIntelligence();
-            System.out.println(
-                String.format("You: %s vs. CPU: %s (Highest %s wins)", stat1, stat2, Stat.INTELLIGENCE.toString()));
+                if (statCPU > statPlayer)
+                    cpuWins = true;
+                break;
+            
+            case 2:  // FRIENDLINESS
+                statPlayer = player.get(0).getStatFriendliness();
+                statCPU = cpu.get(0).getStatFriendliness();
 
-            if (stat2 > stat1)
-                cpuWins = true;
-        }
-        else if (curStat == Stat.FRIENDLINESS) {
-            stat1 = player.get(0).getStatFriendliness();
-            stat2 = cpu.get(0).getStatFriendliness();
-            System.out.println(
-                String.format("You: %s vs. CPU: %s (Highest %s wins)", stat1, stat2, Stat.FRIENDLINESS.toString()));
+                if (statCPU > statPlayer)
+                    cpuWins = true;
+                break;
+            
+            case 3:  // DROOL
+                statPlayer = player.get(0).getStatDrool();
+                statCPU = cpu.get(0).getStatDrool();
 
-            if (stat2 > stat1)
-                cpuWins = true;
-        }
-        else if (curStat == Stat.DROOL) {
-            stat1 = player.get(0).getStatDrool();
-            stat2 = cpu.get(0).getStatDrool();
-            System.out.println(
-                String.format("You: %s vs. CPU: %s (Lowest %s wins)", stat1, stat2, Stat.DROOL.toString()));
-
-            if (stat2 < stat1)
-                cpuWins = true;
+                if (statCPU < statPlayer)
+                    cpuWins = true;
+                break;
         }
 
-        if (stat2 == stat1)
+        if (statCPU == statPlayer)
             draw = true;
+
+        String colPlayer;
+        String colCPU;
+
+        if (cpuWins) {
+            colPlayer = losing(statPlayer);
+            colCPU = winning(statCPU);
+        }
+        else if (!cpuWins && draw) {
+            colPlayer = winning(statPlayer);
+            colCPU = winning(statCPU);
+        }
+        else {
+            colPlayer = winning(statPlayer);
+            colCPU = losing(statCPU);
+        }
+
+        if (curStat != Stat.DROOL) {
+            System.out.println(
+                String.format("You: %s vs. CPU: %s (Highest %s wins)", colPlayer, colCPU, curStat.toString()));
+        }
+        else {
+            System.out.println(
+                String.format("You: %s vs. CPU: %s (Lowest %s wins)", colPlayer, colCPU, curStat.toString()));
+        }
+
+        try {
+            Thread.sleep(2000);
+        }
+        catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
 
         if (cpuWins) {
             printlnCol("You lose this round!", ANSI_RED);
@@ -265,5 +347,6 @@ public class Game {
             player.add(cpu.remove(0));
             cpuStat = false;
         }
+        printlnCol(String.format("Cards: Player has %d, CPU has %d", player.size(), cpu.size()), ANSI_MAGENTA);
     }
 }
