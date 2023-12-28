@@ -31,8 +31,9 @@ public class Game {
         cpuStat = false;  // Determines turn. Player chooses their stat first.
     }
 
-    public void start() {
-        displayMenu();
+    public boolean start() {
+        if (!displayMenu())
+            return false;
 
         int input = 0;
         while (input == 0)
@@ -63,6 +64,7 @@ public class Game {
             }
         }
         System.out.println("----------------------------------------");
+        return true;
     }
 
     public void reset() {
@@ -84,7 +86,7 @@ public class Game {
         System.out.println(sb.toString());
     }
 
-    private void displayMenu() {
+    private boolean displayMenu() {
         String input;
 
         printlnCol("Celebrity Dogs", ANSI_CYAN);
@@ -105,12 +107,13 @@ public class Game {
             try {
                 System.out.println("Closing the game...");
                 Thread.sleep(1000);
-                System.exit(0);
+                return false;
             }
             catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
         }
+        return true;
     }
 
     private ArrayList<Card> readFile(String path) {
